@@ -11,11 +11,11 @@ const LoginPage = () => {
   const [role, setRole] = useState<string>("");
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+    <div className="min-h-screen w-full flex items-center justify-center dark-gradient p-4">
       <div className="w-full max-w-md animate-fade-in">
         <Card className="glass">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center text-foreground">Welcome back</CardTitle>
             <CardDescription className="text-center">
               Sign in to continue to the portal
             </CardDescription>
@@ -24,7 +24,7 @@ const LoginPage = () => {
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
               <Select value={role} onValueChange={setRole}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-secondary">
                   <SelectValue placeholder="Select your role" />
                 </SelectTrigger>
                 <SelectContent>
@@ -41,7 +41,7 @@ const LoginPage = () => {
                   id="email" 
                   type="email" 
                   placeholder="m@example.com"
-                  className="pl-10" 
+                  className="pl-10 bg-secondary border-secondary" 
                 />
                 <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
               </div>
@@ -52,14 +52,14 @@ const LoginPage = () => {
                 <Input 
                   id="password" 
                   type="password"
-                  className="pl-10" 
+                  className="pl-10 bg-secondary border-secondary" 
                 />
                 <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
               </div>
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button className="w-full">
               Sign In
             </Button>
           </CardFooter>
