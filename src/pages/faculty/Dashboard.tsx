@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Clock, HelpCircle, XCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import Image from "./peakpx.jpg";
 
 const FacultyDashboard = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -22,6 +23,7 @@ const FacultyDashboard = () => {
       event: "Tech Summit 2024",
       phone: "+1 (555) 000-0000",
       contact: "Event Coordinator",
+      idCard: Image, 
     },
   ];
 
@@ -139,7 +141,7 @@ const FacultyDashboard = () => {
       
       {/* Modal for Request Details */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DialogContent className="p-6 rounded-lg shadow-lg bg-gray-900 text-gray-200 border border-gray-700">
+<DialogContent className="p-6 rounded-lg shadow-lg bg-gray-900 text-gray-200 border border-gray-700">
   <DialogHeader className="border-b border-gray-700 pb-4">
     <DialogTitle className="text-3xl font-extrabold text-white">
       Request Details
@@ -157,6 +159,17 @@ const FacultyDashboard = () => {
       <p className="text-lg"><strong className="text-gray-100">Phone:</strong> {selectedRequest.phone}</p>
       <p className="text-lg"><strong className="text-gray-100">Point of Contact:</strong> {selectedRequest.contact}</p>
       <p className="text-lg"><strong className="text-gray-100">Description:</strong> {selectedRequest.description}</p>
+      {selectedRequest.idCard && (
+        <div className="mt-4">
+          <p className="text-lg font-semibold text-gray-100">ID Card:</p>
+          <img
+            src={selectedRequest.idCard}
+            alt="ID Card"
+            className="w-full max-w-xs rounded-lg border border-gray-600 shadow-lg"
+          />
+        </div>
+      )}
+    
     </div>
   )}
 </DialogContent>
