@@ -1,11 +1,35 @@
-
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Clock, HelpCircle, XCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const FacultyDashboard = () => {
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const requests = [
+    {
+      id: 1,
+      name: "John Doe",
+      email: "john@example.com",
+      date: "March 11, 2024",
+      time: "2:00 PM",
+      description: "Requesting permission to hold Tech Summit 2024.",
+      club: "Tech Club",
+      event: "Tech Summit 2024",
+      phone: "+1 (555) 000-0000",
+      contact: "Event Coordinator",
+    },
+  ];
+
+  const handleViewRequest = (request) => {
+    setSelectedRequest(request);
+    setIsModalOpen(true);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-8">
@@ -72,18 +96,18 @@ const FacultyDashboard = () => {
           </div>
           
           <div className="grid gap-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="glass">
+            {requests.map((request) => (
+              <Card key={request.id} className="glass">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="space-y-3">
                       <div className="space-y-1">
                         <h4 className="font-semibold">Event Permission Request</h4>
-                        <p className="text-sm text-muted-foreground">From: John Doe • CS Department</p>
+                        <p className="text-sm text-muted-foreground">From: {request.name} • {request.club}</p>
                       </div>
                       <div className="flex gap-2">
                         <Badge variant="outline">Event</Badge>
-                        <Badge variant="outline">March {i+10}, 2024</Badge>
+                        <Badge variant="outline">{request.date}</Badge>
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -95,9 +119,14 @@ const FacultyDashboard = () => {
                         <XCircle className="mr-2 h-4 w-4" />
                         Deny
                       </Button>
-                      <Button size="sm" variant="outline" className="border-blue-500 text-blue-500 hover:bg-blue-50">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-blue-500 text-blue-500 hover:bg-blue-50"
+                        onClick={() => handleViewRequest(request)}
+                      >
                         <HelpCircle className="mr-2 h-4 w-4" />
-                        Request Info
+                        View Request
                       </Button>
                     </div>
                   </div>
@@ -107,6 +136,33 @@ const FacultyDashboard = () => {
           </div>
         </section>
       </div>
+      
+      {/* Modal for Request Details */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogContent className="p-6 rounded-lg shadow-lg bg-gray-900 text-gray-200 border border-gray-700">
+  <DialogHeader className="border-b border-gray-700 pb-4">
+    <DialogTitle className="text-3xl font-extrabold text-white">
+      Request Details
+    </DialogTitle>
+  </DialogHeader>
+  
+  {selectedRequest && (
+    <div className="space-y-3 mt-4">
+      <p className="text-lg"><strong className="text-gray-100">Name:</strong> {selectedRequest.name}</p>
+      <p className="text-lg"><strong className="text-gray-100">Email:</strong> {selectedRequest.email}</p>
+      <p className="text-lg"><strong className="text-gray-100">Date:</strong> {selectedRequest.date}</p>
+      <p className="text-lg"><strong className="text-gray-100">Time:</strong> {selectedRequest.time}</p>
+      <p className="text-lg"><strong className="text-gray-100">Event:</strong> {selectedRequest.event}</p>
+      <p className="text-lg"><strong className="text-gray-100">Club:</strong> {selectedRequest.club}</p>
+      <p className="text-lg"><strong className="text-gray-100">Phone:</strong> {selectedRequest.phone}</p>
+      <p className="text-lg"><strong className="text-gray-100">Point of Contact:</strong> {selectedRequest.contact}</p>
+      <p className="text-lg"><strong className="text-gray-100">Description:</strong> {selectedRequest.description}</p>
+    </div>
+  )}
+</DialogContent>
+
+
+      </Dialog>
     </DashboardLayout>
   );
 };
