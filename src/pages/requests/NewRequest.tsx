@@ -103,7 +103,7 @@ const NewRequest = () => {
                 </div>
 
                 {/* Conditional Fields */}
-                {requestType === "event" && (
+                
                   <div className="space-y-4 animate-fade-in">
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
@@ -126,7 +126,7 @@ const NewRequest = () => {
                       </div>
                     </div>
                   </div>
-                )}
+                
 
                 {requestType === "venue" && (
                   <div className="space-y-2 animate-fade-in">
