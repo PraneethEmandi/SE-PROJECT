@@ -44,6 +44,57 @@ app.post("/api/login", (req, res) => {
   });
 });
 
+app.post("/api/new-request", async (req, res) => {
+  const {
+    requestType,
+    fullName,
+    email,
+    requestDate,
+    requestTime,
+    description,
+    idCardUpload,
+    clubName,
+    eventName,
+    phoneNumber,
+    pointOfContact,
+  } = req.body;
+
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    // Insert into `requests` table
+    const [requestResult] = await connection.execute(
+      `INSERT INTO requests 
+      (request_type, full_name, email, request_date, request_time, description, id_card_upload, status) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      [requestType, fullName, email, requestDate, requestTime, description, idCardUpload]
+    );
+
+    const requestId = requestResult.insertId; // Get last inserted request ID
+
+    // If the request type is 'event', insert into `events_permissions`
+    if (requestType === "event") {
+      await connection.execute(
+        `INSERT INTO events_permissions (request_id, club_name, event_name, phone_number, point_of_contact) 
+        VALUES (?, ?, ?, ?, ?)`,
+        [requestId, clubName, eventName, phoneNumber, pointOfContact]
+      );
+    }
+
+    await connection.commit();
+    res.status(201).json({ message: "Request submitted successfully", requestId });
+
+  } catch (error) {
+    await connection.rollback();
+    console.error("Error submitting request:", error);
+    res.status(500).json({ error: "Internal server error" });
+
+  } finally {
+    connection.release();
+  }
+});
 
 
 app.listen(5000, () => {
