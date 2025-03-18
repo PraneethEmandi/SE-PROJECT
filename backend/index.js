@@ -1,22 +1,59 @@
 const express = require("express");
-const mysql = require("mysql2");
-const bcrypt = require("bcrypt");
+const mysql = require("mysql2/promise");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const db = mysql.createConnection({
+// Ensure id_cards directory exists
+const idCardsDir = path.join(__dirname, "id_cards");
+if (!fs.existsSync(idCardsDir)) {
+  fs.mkdirSync(idCardsDir);
+}
+
+// Multer setup for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, idCardsDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ["image/png", "image/jpeg", "application/pdf"];
+    if (!allowedTypes.includes(file.mimetype)) {
+      return cb(new Error("Only PNG, JPEG, and PDF files are allowed."));
+    }
+    cb(null, true);
+  },
+});
+
+
+
+const db = mysql.createPool({
   host: "localhost",
   user: "root",
   password: "peace",
   database: "seproject2",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
+
 
 app.post("/api/login", (req, res) => {
   const { email, password, role } = req.body; // Receive role from frontend
+  app.use(express.urlencoded({ extended: true }));
 
   const query = "SELECT * FROM users WHERE email = ?";
   db.query(query, [email], (err, results) => {
@@ -44,7 +81,8 @@ app.post("/api/login", (req, res) => {
   });
 });
 
-app.post("/api/new-request", async (req, res) => {
+// Handle new request submissions
+app.post("/api/new-request", upload.single("idCard"), async (req, res) => {
   const {
     requestType,
     fullName,
@@ -52,12 +90,14 @@ app.post("/api/new-request", async (req, res) => {
     requestDate,
     requestTime,
     description,
-    idCardUpload,
     clubName,
     eventName,
     phoneNumber,
     pointOfContact,
+    venueLocation, // Added for venue requests
   } = req.body;
+
+  const idCardPath = req.file ? `/id_cards/${req.file.filename}` : null;
 
   const connection = await db.getConnection();
 
@@ -69,17 +109,24 @@ app.post("/api/new-request", async (req, res) => {
       `INSERT INTO requests 
       (request_type, full_name, email, request_date, request_time, description, id_card_upload, status) 
       VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`,
-      [requestType, fullName, email, requestDate, requestTime, description, idCardUpload]
+      [requestType, fullName, email, requestDate, requestTime, description, idCardPath]
     );
 
     const requestId = requestResult.insertId; // Get last inserted request ID
 
-    // If the request type is 'event', insert into `events_permissions`
     if (requestType === "event") {
+      // Insert into `events_permissions`
       await connection.execute(
         `INSERT INTO events_permissions (request_id, club_name, event_name, phone_number, point_of_contact) 
         VALUES (?, ?, ?, ?, ?)`,
         [requestId, clubName, eventName, phoneNumber, pointOfContact]
+      );
+    } else if (requestType === "venue") {
+      // Insert into `venue_permissions`
+      await connection.execute(
+        `INSERT INTO venue_permissions (request_id, venue_location, club_name, event_name, phone_number, point_of_contact) 
+        VALUES (?, ?, ?, ?, ?, ?)`,
+        [requestId, venueLocation, clubName, eventName, phoneNumber, pointOfContact]
       );
     }
 
@@ -95,6 +142,7 @@ app.post("/api/new-request", async (req, res) => {
     connection.release();
   }
 });
+
 
 
 app.listen(5000, () => {
