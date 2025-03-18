@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Bell, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -10,7 +11,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
+    const navigate = useNavigate();
   return (
     <div className="min-h-screen dark-gradient">
       {/* Header */}
@@ -46,10 +47,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         )}
       >
         <nav className="space-y-2 p-4">
-          <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
+          <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary" onClick={() => navigate("/dashboard")}>
             Dashboard
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
+          <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary" onClick={() => navigate("/requests/new")}>
             New Request
           </Button>
           <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">

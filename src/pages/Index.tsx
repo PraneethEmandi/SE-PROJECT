@@ -3,8 +3,10 @@ import { Card } from "@/components/ui/card";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
   return (
     <DashboardLayout>
       <div className="space-y-8">
@@ -24,7 +26,9 @@ const Index = () => {
               <PlusCircle className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="text-sm text-muted-foreground">Create a new permission request</p>
-            <Button className="w-full">Start Request</Button>
+            <Button className="w-full" onClick={() => navigate("/requests/new")}>
+                Start Request
+            </Button>
           </Card>
 
           <Card className="p-6 glass space-y-4">
