@@ -105,17 +105,19 @@ const LoginPage = () => {
       const data = await response.json();
       if (response.ok) {
         toast.success(`Welcome, ${data.user.name}!`);
-        
-        // Redirect based on role
+        localStorage.setItem("token", data.token); // Store token in localStorage
+        console.log("Login successful");
+
+        // Redirect based on role with user ID
         switch (data.user.role) {
           case "Student":
-            navigate("/student/dashboard");
+            navigate(`/student/dashboard/${data.user.id}`);
             break;
           case "Faculty":
-            navigate("/faculty/dashboard");
+            navigate(`/faculty/dashboard/${data.user.id}`);
             break;
           case "Administrator":
-            navigate("/admin/dashboard");
+            navigate(`/admin/dashboard/${data.user.id}`);
             break;
           default:
             toast.error("Invalid role detected.");

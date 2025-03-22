@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +8,7 @@ import Index from "./pages/Index";
 import FacultyDashboard from "./pages/faculty/Dashboard";
 import NewRequest from "./pages/requests/NewRequest";
 import NotFound from "./pages/NotFound";
-
+import Drop from "./test/Drop";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -20,9 +19,10 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/student/dashboard" element={<Index />} />
-          <Route path="/faculty/dashboard" element={<FacultyDashboard />} />
+          <Route path="/student/dashboard/:id" element={<Index />} />
+          <Route path="/faculty/dashboard/:id" element={<FacultyDashboard />} />
           <Route path="/requests/new" element={<NewRequest />} />
+          <Route path="/drop" element={<Drop />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

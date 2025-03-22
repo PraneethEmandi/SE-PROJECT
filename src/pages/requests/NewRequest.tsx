@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,13 +36,34 @@ const NewRequest = () => {
   const [idCard, setIdCard] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [requestTo, setRequestTo] = useState("");
+  const [facultyList, setFacultyList] = useState([]);
+  const [selectedFaculty, setSelectedFaculty] = useState(null);
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       setIdCard(event.target.files[0]);
     }
   };
-
+  useEffect(() => {
+    const fetchFaculty = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/faculty-coordinators"
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setFacultyList(data.faculties);
+        } else {
+          console.error("Error fetching faculty data:", data.error);
+        }
+      } catch (error) {
+        console.error("Failed to fetch faculty members:", error);
+      }
+    };
+    fetchFaculty();
+  }, []);
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
@@ -55,7 +76,7 @@ const NewRequest = () => {
     formData.append("requestDate", date ? format(date, "yyyy-MM-dd") : "");
     formData.append("requestTime", time);
     formData.append("description", description);
-
+    formData.append("faculty", selectedFaculty);
     if (idCard) {
       formData.append("idCard", idCard);
     }
@@ -333,7 +354,22 @@ const NewRequest = () => {
                         </label>
                       </div>
                     </div>
+                    
+                    
                   </div>
+                  <Label>Select Faculty</Label>
+              <Select onValueChange={setSelectedFaculty}>
+                <SelectTrigger className="w-full">
+                  {selectedFaculty ? facultyList.find(f => f.id.toString() === selectedFaculty)?.name || "Select Faculty" : "Select Faculty"}
+                </SelectTrigger>
+                <SelectContent>
+                  {facultyList.map((faculty) => (
+                    <SelectItem key={faculty.id} value={faculty.id.toString()}>
+                      {`${faculty.name} - ${faculty.club_name || "No Club"}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
                   {/* Submit Button */}
                   <Button className="w-full" type="submit">
