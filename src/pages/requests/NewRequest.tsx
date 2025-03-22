@@ -315,13 +315,20 @@ const NewRequest = () => {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="venueLocation">Venue Location</Label>
-                        <Input
-                          id="venueLocation"
-                          placeholder="Main Auditorium"
-                          className="bg-secondary/50"
-                          value={venueLocation}
-                          onChange={(e) => setVenueLocation(e.target.value)}
-                        />
+                        <Select value={venueLocation} onValueChange={setVenueLocation}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select venue" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ELHC 203">ELHC 203</SelectItem>
+                        <SelectItem value="ELHC 401">ELHC 401</SelectItem>
+                        <SelectItem value="ELHC 402">ELHC 402</SelectItem>
+                        <SelectItem value="ELHC 403">ELHC 403</SelectItem>
+                        <SelectItem value="NLHC 101">NLHC 101</SelectItem>
+                        <SelectItem value="NLHC 102">NLHC 102</SelectItem>
+                        <SelectItem value="CSED Seminar Hall">CSED Seminar Hall</SelectItem>
+                      </SelectContent>
+                    </Select>
                       </div>
                     </div>
                   )}

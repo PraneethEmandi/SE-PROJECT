@@ -12,7 +12,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
   return (
     <div className="min-h-screen dark-gradient">
       {/* Header */}
@@ -48,18 +48,18 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         )}
       >
         <nav className="space-y-2 p-4">
-          <Link to="/dashboard"><Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
+          <Link to="/student/dashboard/:id"><Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
             Dashboard
           </Button></Link>
           <Link to="/requests/new"><Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
             New Request
           </Button></Link>
-          <Link to=""><Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
+          {/* <Link to=""><Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
             My Requests
           </Button></Link>
           <Link to=""><Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
             Settings
-          </Button></Link>
+          </Button></Link> */}
         </nav>
       </aside>
 

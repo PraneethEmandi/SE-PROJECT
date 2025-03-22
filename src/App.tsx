@@ -22,7 +22,7 @@ const App = () => (
           <Route path="/student/dashboard/:id" element={<Index />} />
           <Route path="/faculty/dashboard/:id" element={<FacultyDashboard />} />
           <Route path="/requests/new" element={<NewRequest />} />
-          <Route path="/drop" element={<Drop />} />
+          {/* <Route path="/drop" element={<Drop />} /> */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
