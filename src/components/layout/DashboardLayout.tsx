@@ -3,7 +3,8 @@ import { useState } from "react";
 import { Bell, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -47,18 +48,18 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         )}
       >
         <nav className="space-y-2 p-4">
-          <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary" onClick={() => navigate("/dashboard")}>
+          <Link to="/dashboard"><Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
             Dashboard
-          </Button>
-          <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary" onClick={() => navigate("/requests/new")}>
+          </Button></Link>
+          <Link to="/requests/new"><Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
             New Request
-          </Button>
-          <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
+          </Button></Link>
+          <Link to=""><Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
             My Requests
-          </Button>
-          <Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
+          </Button></Link>
+          <Link to=""><Button variant="ghost" className="w-full justify-start text-foreground hover:bg-secondary">
             Settings
-          </Button>
+          </Button></Link>
         </nav>
       </aside>
 
