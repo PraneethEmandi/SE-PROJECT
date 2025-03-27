@@ -36,14 +36,15 @@ const NewRequest = () => {
   const [idCard, setIdCard] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [idCardName, setIdCardName] = useState<string>("");
   const [requestTo, setRequestTo] = useState("");
   const [facultyList, setFacultyList] = useState([]);
   const [selectedFaculty, setSelectedFaculty] = useState(null);
 
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
+    if (event.target.files && event.target.files.length > 0) {
       setIdCard(event.target.files[0]);
+      setIdCardName(event.target.files[0].name);
     }
   };
   useEffect(() => {
@@ -68,7 +69,13 @@ const NewRequest = () => {
     event.preventDefault();
     setLoading(true);
     setMessage(null);
-
+  
+    // Confirm submission
+    if (!window.confirm("Are you sure you want to submit the request?")) {
+      setLoading(false);
+      return;
+    }
+  
     const formData = new FormData();
     formData.append("requestType", requestType);
     formData.append("fullName", fullName);
@@ -76,11 +83,11 @@ const NewRequest = () => {
     formData.append("requestDate", date ? format(date, "yyyy-MM-dd") : "");
     formData.append("requestTime", time);
     formData.append("description", description);
-    formData.append("faculty", selectedFaculty);
+    formData.append("faculty", selectedFaculty || "");
     if (idCard) {
       formData.append("idCard", idCard);
     }
-
+  
     if (requestType === "event" || requestType === "venue") {
       formData.append("clubName", clubName);
       formData.append("eventName", eventName);
@@ -90,29 +97,33 @@ const NewRequest = () => {
     if (requestType === "venue") {
       formData.append("venueLocation", venueLocation);
     }
-
+  
     try {
       const response = await fetch("http://localhost:5000/api/new-request", {
         method: "POST",
         body: formData,
       });
-
+  
       const result = await response.json();
       if (response.ok) {
         setMessage("Request submitted successfully!");
+        alert(`Success: Request submitted successfully!\n\nDetails:\n- Name: ${fullName}\n- Email: ${email}\n- Date: ${date ? format(date, "PPP") : "Not selected"}\n- Time: ${time || "Not provided"}\n- Type: ${requestType}\n- Faculty: ${selectedFaculty || "Not selected"}`);
+        window.location.reload();
       } else {
         setMessage(result.error || "Something went wrong.");
+        alert(`Error: ${result.error || "Something went wrong."}`);
       }
     } catch (error) {
       setMessage("Server error. Please try again.");
+      alert("Server error. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <DashboardLayout>
-      
       <div className="max-w-4xl mx-auto space-y-6">
         <Card className="glass">
           <CardHeader>
@@ -315,20 +326,25 @@ const NewRequest = () => {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="venueLocation">Venue Location</Label>
-                        <Select value={venueLocation} onValueChange={setVenueLocation}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select venue" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ELHC 203">ELHC 203</SelectItem>
-                        <SelectItem value="ELHC 401">ELHC 401</SelectItem>
-                        <SelectItem value="ELHC 402">ELHC 402</SelectItem>
-                        <SelectItem value="ELHC 403">ELHC 403</SelectItem>
-                        <SelectItem value="NLHC 101">NLHC 101</SelectItem>
-                        <SelectItem value="NLHC 102">NLHC 102</SelectItem>
-                        <SelectItem value="CSED Seminar Hall">CSED Seminar Hall</SelectItem>
-                      </SelectContent>
-                    </Select>
+                        <Select
+                          value={venueLocation}
+                          onValueChange={setVenueLocation}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select venue" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ELHC 203">ELHC 203</SelectItem>
+                            <SelectItem value="ELHC 401">ELHC 401</SelectItem>
+                            <SelectItem value="ELHC 402">ELHC 402</SelectItem>
+                            <SelectItem value="ELHC 403">ELHC 403</SelectItem>
+                            <SelectItem value="NLHC 101">NLHC 101</SelectItem>
+                            <SelectItem value="NLHC 102">NLHC 102</SelectItem>
+                            <SelectItem value="CSED Seminar Hall">
+                              CSED Seminar Hall
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   )}
@@ -361,23 +377,38 @@ const NewRequest = () => {
                           />
                         </label>
                       </div>
+
+                      {/* Display selected file with checkmark */}
+                      {idCard && (
+                        <div className="flex items-center mt-2 p-2 rounded-lg bg-secondary/30 border border-border text-foreground shadow-sm">
+                          <span className="mr-2 text-green-500">✔</span>
+                          <span className="truncate">{idCardName}</span>
+                        </div>
+                      )}
                     </div>
-                    
-                    
                   </div>
                   <Label>Select Faculty</Label>
-              <Select onValueChange={setSelectedFaculty}>
-                <SelectTrigger className="w-full">
-                  {selectedFaculty ? facultyList.find(f => f.id.toString() === selectedFaculty)?.name || "Select Faculty" : "Select Faculty"}
-                </SelectTrigger>
-                <SelectContent>
-                  {facultyList.map((faculty) => (
-                    <SelectItem key={faculty.id} value={faculty.id.toString()}>
-                      {`${faculty.name} - ${faculty.club_name || "No Club"}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <Select onValueChange={setSelectedFaculty}>
+                    <SelectTrigger className="w-full">
+                      {selectedFaculty
+                        ? facultyList.find(
+                            (f) => f.id.toString() === selectedFaculty
+                          )?.name || "Select Faculty"
+                        : "Select Faculty"}
+                    </SelectTrigger>
+                    <SelectContent>
+                      {facultyList.map((faculty) => (
+                        <SelectItem
+                          key={faculty.id}
+                          value={faculty.id.toString()}
+                        >
+                          {`${faculty.name} - ${
+                            faculty.club_name || "No Club"
+                          }`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
                   {/* Submit Button */}
                   <Button className="w-full" type="submit">

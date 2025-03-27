@@ -60,6 +60,7 @@ const FacultyDashboard = () => {
         );
         const requestsData = await requestsResponse.json();
         setRequests(requestsData);
+        console.log("kaja ", requestsData)
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -191,13 +192,21 @@ const FacultyDashboard = () => {
       console.error("Error denying request:", error);
     }
   };
-
+  const getImageUrl = (path) => {
+    console.log(path)
+    return `http://localhost:5000${path}`; // Replace with actual base URL
+  };
+  
+  const handleImageError = (event) => {
+    console.log("HI")
+    event.target.src = "/placeholder-image.jpg"; // Provide a fallback image
+  };
   return (
     <DashboardLayout>
       <div className="space-y-8">
         {/* Welcome Section */}
         <section className="space-y-4">
-          <h2 className="text-3xl font-bold tracking-tight">
+          <h2 className="text-2xl font-bold tracking-tight">
             Welcome back, Dr. Smith
           </h2>
           <p className="text-muted-foreground">
@@ -361,6 +370,19 @@ const FacultyDashboard = () => {
                 <strong className="text-gray-100">Description:</strong>{" "}
                 {selectedRequest.description}
               </p>
+              {selectedRequest.id_card && (
+                <div className="mt-4">
+                  <strong className="text-gray-100">ID Card:</strong>
+                  <div className="mt-2 border border-gray-300 p-2">
+                    <img
+                      src={getImageUrl(selectedRequest.id_card)}
+                      alt="ID Card"
+                      className="w-full max-w-xs rounded"
+                      onError={(e) => handleImageError(e)}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
