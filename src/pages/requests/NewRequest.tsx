@@ -20,11 +20,16 @@ import { Calendar as CalendarIcon, Clock, Upload } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { useParams } from "react-router-dom";
 
 const NewRequest = () => {
+  const { id } = useParams();
+  console.log(id);
   const [requestType, setRequestType] = useState<string>("");
   const [date, setDate] = useState<Date | null>(null);
   const [time, setTime] = useState<string>("");
+  const [timeEnd, setTimeEnd] = useState<string>("");
+
   const [fullName, setFullName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -69,25 +74,28 @@ const NewRequest = () => {
     event.preventDefault();
     setLoading(true);
     setMessage(null);
-  
+
     // Confirm submission
     if (!window.confirm("Are you sure you want to submit the request?")) {
       setLoading(false);
       return;
     }
-  
+
     const formData = new FormData();
     formData.append("requestType", requestType);
     formData.append("fullName", fullName);
     formData.append("email", email);
     formData.append("requestDate", date ? format(date, "yyyy-MM-dd") : "");
     formData.append("requestTime", time);
+    formData.append("requestTimeEnd", timeEnd);
+
     formData.append("description", description);
     formData.append("faculty", selectedFaculty || "");
+    formData.append("requester_id", id);
     if (idCard) {
       formData.append("idCard", idCard);
     }
-  
+
     if (requestType === "event" || requestType === "venue") {
       formData.append("clubName", clubName);
       formData.append("eventName", eventName);
@@ -97,13 +105,13 @@ const NewRequest = () => {
     if (requestType === "venue") {
       formData.append("venueLocation", venueLocation);
     }
-  
+
     try {
       const response = await fetch("http://localhost:5000/api/new-request", {
         method: "POST",
         body: formData,
       });
-  
+
       const result = await response.json();
       if (response.ok) {
         setMessage("Request submitted successfully!");
@@ -120,7 +128,7 @@ const NewRequest = () => {
       setLoading(false);
     }
   };
-  
+
 
   return (
     <DashboardLayout>
@@ -196,8 +204,8 @@ const NewRequest = () => {
                         </PopoverContent>
                       </Popover>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="time">Time</Label>
+                    {/* <div className="space-y-2">
+                      <Label htmlFor="time">Start Time</Label>
                       <div className="relative">
                         <Input
                           id="time"
@@ -209,7 +217,38 @@ const NewRequest = () => {
 
                         <Clock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                       </div>
+                      
+                    </div> */}
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="time">Start Time</Label>
+                        <div className="relative">
+                          <Input
+                            id="time"
+                            type="time"
+                            className="bg-secondary/50 pl-10"
+                            value={time}
+                            onChange={(e) => setTime(e.target.value)}
+                          />
+                          <Clock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="timeEnd">End Time</Label>
+                        <div className="relative">
+                          <Input
+                            id="timeEnd"
+                            type="time"
+                            className="bg-secondary/50 pl-10"
+                            value={timeEnd}
+                            onChange={(e) => setTimeEnd(e.target.value)}
+                          />
+                          <Clock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        </div>
+                      </div>
                     </div>
+
                   </div>
 
                   {/* Description */}
@@ -392,8 +431,8 @@ const NewRequest = () => {
                     <SelectTrigger className="w-full">
                       {selectedFaculty
                         ? facultyList.find(
-                            (f) => f.id.toString() === selectedFaculty
-                          )?.name || "Select Faculty"
+                          (f) => f.id.toString() === selectedFaculty
+                        )?.name || "Select Faculty"
                         : "Select Faculty"}
                     </SelectTrigger>
                     <SelectContent>
@@ -402,9 +441,8 @@ const NewRequest = () => {
                           key={faculty.id}
                           value={faculty.id.toString()}
                         >
-                          {`${faculty.name} - ${
-                            faculty.club_name || "No Club"
-                          }`}
+                          {`${faculty.name} - ${faculty.club_name || "No Club"
+                            }`}
                         </SelectItem>
                       ))}
                     </SelectContent>
