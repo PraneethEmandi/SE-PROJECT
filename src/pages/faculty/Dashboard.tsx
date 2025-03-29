@@ -26,6 +26,7 @@ const FacultyDashboard = () => {
     approved: 0,
     rejected: 0,
   });
+  const [hasNextApprovers, setHasNextApprovers] = useState(true); // Default to true
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,7 +61,7 @@ const FacultyDashboard = () => {
         );
         const requestsData = await requestsResponse.json();
         setRequests(requestsData);
-        console.log("kaja ", requestsData)
+        console.log("kaja ", requestsData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -68,52 +69,64 @@ const FacultyDashboard = () => {
 
     fetchData();
   }, []);
-  const fetchNextApprovers = async (requestType) => {
+  const fetchNextApprovers = async (requestType, hierarchy) => {
     try {
       const token = localStorage.getItem("token");
-      console.log("request type:", requestType);
-      console.log("current hierarchy:", facultyHierarchy);
+
+      console.log("Fetching Next Approvers...");
+      console.log("Request Type:", requestType);
+      console.log("Current Hierarchy:", hierarchy);
 
       const response = await fetch(
-        `http://localhost:5000/api/next-approvers?type=${requestType}&hierarchy=${facultyHierarchy}`,
+        `http://localhost:5000/api/next-approvers?type=${requestType}&hierarchy=${hierarchy}`,
         { headers: { Authorization: token } }
       );
+
+      if (!response.ok) throw new Error("Failed to fetch next approvers");
+
       const data = await response.json();
       console.log("Next Approvers:", data);
+
+      setNextApprovers(data);
+      setHasNextApprovers(data.length > 0); // Update hasNextApprovers based on response
+
       return data;
     } catch (error) {
       console.error("Error fetching next approvers:", error);
+      setHasNextApprovers(false); // No next approvers available
       return [];
     }
   };
+
   useEffect(() => {
-    if (selectedRequest) {
+    if (selectedRequest && facultyHierarchy !== undefined) {
+      console.log("Selected Request Changed:", selectedRequest);
+
       const fetchApprovers = async () => {
-        console.log("Selected Request:", selectedRequest);
-        console.log("Permission:", selectedRequest.permission);
-        // console.log("Hierarchy:", selectedRequest.hierarchy);
         const approvers = await fetchNextApprovers(
-          selectedRequest.permission
-          // selectedRequest.hierarchy
+          selectedRequest.permission,
+          facultyHierarchy
         );
         setNextApprovers(approvers);
+        setHasNextApprovers(approvers.length > 0); // Ensure consistency
       };
 
       fetchApprovers();
     }
-  }, [selectedRequest]); // Runs when selectedRequest changes
+  }, [selectedRequest, facultyHierarchy]);
 
   const handleViewRequest = async (request) => {
     setSelectedRequest(request);
     setIsModalOpen(true);
 
-    const approvers = await fetchNextApprovers(request.permission);
+    const approvers = await fetchNextApprovers(request.permission, facultyHierarchy);
+    console.log("Approvers: ", approvers);
     setNextApprovers(approvers);
     setSelectedApprover(""); // Reset selected approver
   };
 
   const handleApprove = async (request) => {
-    if (!selectedApprover) {
+    if (!selectedApprover && hasNextApprovers) {
       alert("Please select the next approver.");
       return;
     }
@@ -136,25 +149,22 @@ const FacultyDashboard = () => {
       const currentHierarchy = hierarchyData.hierarchy; // Extract hierarchy
       console.log("request ", request);
       // Send the appr  oval request
-      const response = await fetch(
-        "http://localhost:5000/api/approve-request",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token,
-          },
-          body: JSON.stringify({
-            request_id: request.request_id,
-            approver_id: selectedApprover,
-          }),
-        }
-      );
-
+      const response = await fetch("http://localhost:5000/api/approve-request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify({
+          request_id: request.request_id,
+          approver_id: hasNextApprovers ? selectedApprover : null, // Pass only if needed
+        }),
+      });
+  
       if (response.ok) {
-        alert("Request approved and forwarded!");
-        setRequests(requests.filter((r) => r.id !== request.request_id)); // Remove approved request from UI
-        window.location.reload(); // Reload the page
+        alert(hasNextApprovers ? "Request approved and forwarded!" : "Request fully approved!");
+        setRequests(requests.filter((r) => r.id !== request.request_id));
+        window.location.reload();
       } else {
         const errorData = await response.json();
         alert(`Failed to approve request: ${errorData.message}`);
@@ -193,12 +203,12 @@ const FacultyDashboard = () => {
     }
   };
   const getImageUrl = (path) => {
-    console.log(path)
+    console.log(path);
     return `http://localhost:5000${path}`; // Replace with actual base URL
   };
-  
+
   const handleImageError = (event) => {
-    console.log("HI")
+    console.log("HI");
     event.target.src = "/placeholder-image.jpg"; // Provide a fallback image
   };
   return (
@@ -279,27 +289,83 @@ const FacultyDashboard = () => {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <select
-                          className="border p-2 rounded"
-                          onChange={(e) => setSelectedApprover(e.target.value)}
-                          value={selectedApprover || ""}
-                        >
-                          <option value="">Select Next Approver</option>
-                          {nextApprovers.map((approver) => (
-                            <option key={approver.id} value={approver.id}>
-                              {approver.name} ({approver.role_name})
-                            </option>
-                          ))}
-                        </select>
+                        {/* {hasNextApprovers && (
+                          <select
+                            className="border p-2 rounded"
+                            onChange={(e) =>
+                              setSelectedApprover(e.target.value)
+                            }
+                            value={selectedApprover || ""}
+                          >
+                            <option value="">Select Next Approver</option>
+                            {nextApprovers.map((approver) => (
+                              <option key={approver.id} value={approver.id}>
+                                {approver.name} ({approver.role_name})
+                              </option>
+                            ))}
+                          </select>
+                        )} */}
+                       
 
-                        <Button
+{/** View Request Button */}
+<Button
+  size="sm"
+  variant="outline"
+  className="border-blue-500 text-blue-500 hover:bg-blue-50"
+  onClick={() => handleViewRequest(request)}
+>
+  <HelpCircle className="mr-2 h-4 w-4" />
+  View Request
+</Button>
+
+{/** Show Approve & Deny Buttons Only If a Request is Selected */}
+{selectedRequest?.request_id === request.request_id && (
+  <div className="flex gap-2">
+    {nextApprovers.length > 0 && (
+      <select
+        className="border p-2 rounded"
+        onChange={(e) => setSelectedApprover(e.target.value)}
+        value={selectedApprover || ""}
+      >
+        <option value="">Select Next Approver</option>
+        {nextApprovers.map((approver) => (
+          <option key={approver.id} value={approver.id}>
+            {approver.name} ({approver.role_name})
+          </option>
+        ))}
+      </select>
+    )}
+
+    <Button
+      size="sm"
+      variant="outline"
+      className="border-emerald-500 text-emerald-500 hover:bg-emerald-50"
+      onClick={() => handleApprove(request)}
+    >
+      <CheckCircle2 className="mr-2 h-4 w-4" />
+      {hasNextApprovers ? "Approve & Forward" : "Approve"}
+    </Button>
+
+    <Button
+      size="sm"
+      variant="outline"
+      className="border-red-500 text-red-500 hover:bg-red-50"
+      onClick={() => denyRequest(request.request_id)}
+    >
+      <XCircle className="mr-2 h-4 w-4" />
+      Deny
+    </Button>
+  </div>
+)}
+
+                        {/* <Button
                           size="sm"
                           variant="outline"
                           className="border-emerald-500 text-emerald-500 hover:bg-emerald-50"
                           onClick={() => handleApprove(request)}
                         >
                           <CheckCircle2 className="mr-2 h-4 w-4" />
-                          Approve
+                          {hasNextApprovers ? "Approve & Forward" : "Approve"}
                         </Button>
 
                         <Button
@@ -320,7 +386,7 @@ const FacultyDashboard = () => {
                         >
                           <HelpCircle className="mr-2 h-4 w-4" />
                           View Request
-                        </Button>
+                        </Button> */}
                       </div>
                     </div>
                   </CardContent>

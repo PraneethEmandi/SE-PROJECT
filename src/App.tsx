@@ -9,6 +9,7 @@ import FacultyDashboard from "./pages/faculty/Dashboard";
 import NewRequest from "./pages/requests/NewRequest";
 import NotFound from "./pages/NotFound";
 import Drop from "./test/Drop";
+import Venues from "./components/layout/Venues";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -22,8 +23,7 @@ const App = () => (
           <Route path="/student/dashboard/:id" element={<Index />} />
           <Route path="/faculty/dashboard/:id" element={<FacultyDashboard />} />
           <Route path="/requests/new/:id" element={<NewRequest />} />
-
-          {/* <Route path="/drop" element={<Drop />} /> */}
+          <Route path="/venues" element={<Venues />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -42,7 +42,7 @@ const db = mysql.createPool({
   host: "localhost",
   user: "root",
   password: "peace",
-  database: "seprojest2",
+  database: "mar30",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -391,16 +391,84 @@ app.get("/api/current-hierarchy", authenticateToken, async (req, res) => {
   }
 });
 
+// app.post("/api/approve-request", authenticateToken, async (req, res) => {
+//   try {
+//     const { request_id, approver_id } = req.body;
+//     const approverId = req.user.id; // Current logged-in approver's ID
+
+//     if (!approver_id) {
+//       return res.status(400).json({ message: "Next approver must be selected." });
+//     }
+
+//     // ✅ Get current approver's hierarchy, role, and permission
+//     const hierarchyQuery = `
+//       SELECT r.hierarchy, r.role_name, r.permission
+//       FROM faculty_roles fr
+//       JOIN roles r ON fr.role_id = r.id
+//       WHERE fr.user_id = ?;
+//     `;
+//     const [approverData] = await db.execute(hierarchyQuery, [approverId]);
+
+//     if (approverData.length === 0) {
+//       return res.status(403).json({ message: "Unauthorized approver" });
+//     }
+
+//     const currentHierarchy = approverData[0].hierarchy;
+//     const permission = approverData[0].permission;
+
+//     // ✅ Fetch current request details
+//     const [requestData] = await db.execute(
+//       `SELECT * FROM approvals WHERE request_id = ? AND approver_id = ?`,
+//       [request_id, approverId]
+//     );
+
+//     if (requestData.length === 0) {
+//       return res.status(404).json({ message: "Request not found or unauthorized approver" });
+//     }
+
+//     console.log(`✅ Approving Request ID: ${request_id}`);
+//     console.log(`🔹 Current Approver ID: ${approverId} (Hierarchy: ${currentHierarchy})`);
+//     console.log(`🔹 Next Approver ID: ${approver_id}`);
+
+//     // ✅ Ensure the selected approver is in the next hierarchy level
+//     const nextHierarchyLevel = currentHierarchy + 1;
+//     const nextApproverQuery = `
+//       SELECT r.hierarchy
+//       FROM faculty_roles fr
+//       JOIN roles r ON fr.role_id = r.id
+//       WHERE fr.user_id = ?;
+//     `;
+//     const [nextApproverData] = await db.execute(nextApproverQuery, [approver_id]);
+
+//     if (nextApproverData.length === 0 || nextApproverData[0].hierarchy !== nextHierarchyLevel) {
+//       return res.status(400).json({ message: "Invalid approver selection. Approver must be in the next hierarchy level." });
+//     }
+
+//     // ✅ Step 1: Update the current approver's status to 'Approved'
+//     await db.execute(
+//       `UPDATE approvals SET status = 'Approved', approval_date = NOW() WHERE request_id = ? AND approver_id = ?`,
+//       [request_id, approverId]
+//     );
+
+//     // ✅ Step 2: Insert new row for the next hierarchy approver
+//     await db.execute(
+//       `INSERT INTO approvals (request_id, approver_id, status, comments, approval_date) VALUES (?, ?, ?, ?, NOW())`,
+//       [request_id, approver_id, "Pending", null]
+//     );
+
+//     res.json({ message: "Request approved and forwarded to the next approver." });
+//   } catch (error) {
+//     console.error("❌ Error approving request:", error);
+//     res.status(500).json({ error: "Database error. Please try again later." });
+//   }
+// });
+
 app.post("/api/approve-request", authenticateToken, async (req, res) => {
   try {
     const { request_id, approver_id } = req.body;
-    const approverId = req.user.id; // Current logged-in approver's ID
+    const approverId = req.user.id; // Current approver's ID
 
-    if (!approver_id) {
-      return res.status(400).json({ message: "Next approver must be selected." });
-    }
-
-    // ✅ Get current approver's hierarchy, role, and permission
+    // ✅ Get current approver's hierarchy
     const hierarchyQuery = `
       SELECT r.hierarchy, r.role_name, r.permission
       FROM faculty_roles fr
@@ -414,7 +482,6 @@ app.post("/api/approve-request", authenticateToken, async (req, res) => {
     }
 
     const currentHierarchy = approverData[0].hierarchy;
-    const permission = approverData[0].permission;
 
     // ✅ Fetch current request details
     const [requestData] = await db.execute(
@@ -426,31 +493,35 @@ app.post("/api/approve-request", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Request not found or unauthorized approver" });
     }
 
-    console.log(`✅ Approving Request ID: ${request_id}`);
-    console.log(`🔹 Current Approver ID: ${approverId} (Hierarchy: ${currentHierarchy})`);
-    console.log(`🔹 Next Approver ID: ${approver_id}`);
-
-    // ✅ Ensure the selected approver is in the next hierarchy level
+    // ✅ Find if there are next-level approvers
     const nextHierarchyLevel = currentHierarchy + 1;
     const nextApproverQuery = `
-      SELECT r.hierarchy
-      FROM faculty_roles fr
+      SELECT fr.user_id FROM faculty_roles fr
       JOIN roles r ON fr.role_id = r.id
-      WHERE fr.user_id = ?;
+      WHERE r.hierarchy = ?;
     `;
-    const [nextApproverData] = await db.execute(nextApproverQuery, [approver_id]);
+    const [nextApprovers] = await db.execute(nextApproverQuery, [nextHierarchyLevel]);
 
-    if (nextApproverData.length === 0 || nextApproverData[0].hierarchy !== nextHierarchyLevel) {
-      return res.status(400).json({ message: "Invalid approver selection. Approver must be in the next hierarchy level." });
-    }
-
-    // ✅ Step 1: Update the current approver's status to 'Approved'
+    // ✅ Approve request for current user
     await db.execute(
       `UPDATE approvals SET status = 'Approved', approval_date = NOW() WHERE request_id = ? AND approver_id = ?`,
       [request_id, approverId]
     );
 
-    // ✅ Step 2: Insert new row for the next hierarchy approver
+    if (nextApprovers.length === 0) {
+      // ✅ No further approvers, mark request as "Fully Approved"
+      await db.execute(
+        `UPDATE requests SET status = 'Approved' WHERE id = ?`,
+        [request_id]
+      );
+      return res.json({ message: "Request fully approved!" });
+    }
+
+    if (!approver_id) {
+      return res.status(400).json({ message: "Next approver must be selected." });
+    }
+
+    // ✅ Forward to next approver
     await db.execute(
       `INSERT INTO approvals (request_id, approver_id, status, comments, approval_date) VALUES (?, ?, ?, ?, NOW())`,
       [request_id, approver_id, "Pending", null]
@@ -500,4 +571,23 @@ app.listen(5000, () => {
 });
 
 
+
+app.get("/api/approved-venues", async (req, res) => {
+  try {
+    const query = `
+      SELECT r.request_date, r.request_time, r.request_time_end, v.venue_location, v.event_name, v.club_name
+      FROM requests r
+      JOIN venue_permissions v ON r.id = v.request_id
+      WHERE r.status = 'Approved'
+      ORDER BY r.request_date, r.request_time;
+    `;
+
+    const [results] = await db.execute(query);
+
+    res.json(results);
+  } catch (error) {
+    console.error("Error fetching approved venues:", error);
+    res.status(500).json({ message: "Database error", error: error.message });
+  }
+});
 
