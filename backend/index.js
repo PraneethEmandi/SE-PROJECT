@@ -93,15 +93,20 @@ app.post("/api/new-request", upload.single("idCard"), async (req, res) => {
     email,
     requestDate,
     requestTime,
+    requestTimeEnd,
     description,
+    faculty,
+    requester_id,
     clubName,
     eventName,
     phoneNumber,
     pointOfContact,
     venueLocation,
-    faculty // Added faculty ID
+    
+    
   } = req.body;
-
+  console.log("Faculty:", faculty);
+  console.log("Requester ID:", requester_id);
   const idCardPath = req.file ? `/id_cards/${req.file.filename}` : null;
 
   const connection = await db.getConnection();
@@ -112,11 +117,11 @@ app.post("/api/new-request", upload.single("idCard"), async (req, res) => {
     // Insert into `requests` table
     const [requestResult] = await connection.execute(
       `INSERT INTO requests 
-      (request_type, full_name, email, request_date, request_time, description, id_card_upload, status) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`,
-      [requestType, fullName, email, requestDate, requestTime, description, idCardPath]
+      (request_type, full_name, email, request_date, request_time, request_time_end, description, id_card_upload, status, requester_id) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
+      [requestType, fullName, email, requestDate, requestTime, requestTimeEnd, description, idCardPath, requester_id]
     );
-
+    
     const requestId = requestResult.insertId; // Get last inserted request ID
 
     if (requestType === "event") {
@@ -190,6 +195,54 @@ const authenticateToken = (req, res, next) => {
   });
 };
 // const jwt = require("jsonwebtoken");
+
+app.get("/api/requests/:id", async (req, res) => {
+  const { id } = req.params;
+  console.log("Fetching requests for requester ID:", id);
+
+  try {
+    const [requests] = await db.query(
+      "SELECT * FROM requests WHERE requester_id = ?",
+      [id]
+    );
+
+    console.log("Requests:", requests);
+    res.json(requests);
+  } catch (error) {
+    console.error("Database error:", error);
+    res.status(500).json({ message: "Error fetching requests" });
+  }
+});
+
+app.get("/api/approvals/:requestId", async (req, res) => {
+  const { requestId } = req.params;
+  console.log("Fetching approvals for request ID:", requestId);
+
+  try {
+    const [approvals] = await db.query(
+      `
+      SELECT 
+        a.status, 
+        u.name AS approver_name, 
+        r.role_name, 
+        r.hierarchy
+      FROM approvals a
+      JOIN users u ON a.approver_id = u.id
+      JOIN faculty_roles fr ON u.id = fr.user_id
+      JOIN roles r ON fr.role_id = r.id
+      WHERE a.request_id = ?
+      ORDER BY r.hierarchy ASC;
+      `,
+      [requestId]
+    );
+
+    console.log("Approvals:", approvals);
+    res.json(approvals);
+  } catch (error) {
+    console.error("Database error:", error);
+    res.status(500).json({ message: "Error fetching approvals" });
+  }
+});
 
 
 
