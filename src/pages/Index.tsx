@@ -17,7 +17,7 @@ interface Request {
   request_type: string;
   request_date: string;
   status: string;
-  approvals?: Approval[]; // Store approvals inside each request
+  approvals?: Approval[]; 
 }
 
 const Index = () => {
@@ -67,24 +67,35 @@ const Index = () => {
 
         {/* Cards for Quick Actions */}
         <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="p-6 glass space-y-4">
+          <Card className="p-6 glass space-y-4 flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">New Request</h3>
               <PlusCircle className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="text-sm text-muted-foreground">Create a new permission request</p>
             <Link to={`/requests/new/${id}`}>
-              <Button className="w-full">Start Request</Button>
+              <Button variant="outline" className="w-full">Start Request</Button>
             </Link>
           </Card>
 
-          <Card className="p-6 glass space-y-4">
+          <Card className="p-6 glass space-y-4 flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold">Booked Venues</h3>
+              <FileText className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <p className="text-sm text-muted-foreground">Check booked venues</p>
+            <Link to="/venues">
+              <Button variant="outline" className="w-full">View Venues</Button>
+            </Link>
+          </Card>
+
+          <Card className="p-6 glass space-y-4 flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">Active Requests</h3>
               <FileText className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="text-2xl font-bold">{requests.length}</p>
-            <Button variant="outline" className="w-full">View All</Button>
+            {/* <Button variant="outline" className="w-full">View All</Button> */}
           </Card>
         </section>
 

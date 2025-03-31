@@ -233,9 +233,6 @@ const FacultyDashboard = () => {
                 <Clock className="h-5 w-5 text-amber-500" />
               </div>
               <p className="text-2xl font-bold">{counts.pending}</p>
-              <Button variant="outline" className="w-full">
-                View All
-              </Button>
             </div>
           </Card>
 
@@ -246,9 +243,6 @@ const FacultyDashboard = () => {
                 <CheckCircle2 className="h-5 w-5 text-emerald-500" />
               </div>
               <p className="text-2xl font-bold">{counts.approved}</p>
-              <Button variant="outline" className="w-full">
-                View History
-              </Button>
             </div>
           </Card>
 
@@ -259,9 +253,6 @@ const FacultyDashboard = () => {
                 <XCircle className="h-5 w-5 text-red-500" />
               </div>
               <p className="text-2xl font-bold">{counts.rejected}</p>
-              <Button variant="outline" className="w-full">
-                View History
-              </Button>
             </div>
           </Card>
         </section>

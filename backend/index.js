@@ -41,8 +41,8 @@ const upload = multer({
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "peace",
-  database: "mar30",
+  password: "irs@2023",
+  database: "mar28",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
