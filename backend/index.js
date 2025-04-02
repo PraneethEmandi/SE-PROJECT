@@ -41,7 +41,7 @@ const upload = multer({
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "irs@2023",
+  password: "MKHarsha#8",
   database: "mar28",
   waitForConnections: true,
   connectionLimit: 10,
@@ -82,6 +82,12 @@ app.post("/api/login", async (req, res) => {
     res.status(500).json({ message: "Database error", error: error.message });
   }
 });
+
+// app.post("/api/logout",(req,res) => {
+//   const token = req.headers["authorization"];
+//   if(!token) return res.status(400).json({message: "No token provided"});
+//   res.json({message: "Logged out successfully"});
+// });
 
 // Handle new request submissions
 app.post("/api/new-request", upload.single("idCard"), async (req, res) => {

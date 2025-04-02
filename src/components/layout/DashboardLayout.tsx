@@ -1,12 +1,23 @@
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+  const navigate = useNavigate();
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    // fetch("http://localhost:5000/api/logout",{
+    //   method: "POST",
+    //   headers: {
+    //     Authorization: localStorage.getItem("token"),
+    //   },
+    // })
+    navigate("/");
+  }
   return (
     <div className="min-h-screen dark-gradient flex flex-col">
       {/* Header */}
@@ -17,7 +28,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <Button variant="ghost" size="icon" className="text-foreground hover:bg-secondary">
               <Bell className="h-6 w-6" />
             </Button>
-            <Button variant="ghost" size="sm" className="text-foreground hover:bg-secondary">
+            <Button variant="ghost" size="sm" className="text-foreground hover:bg-secondary" onClick = {handleSignOut}>
               Sign Out
             </Button>
           </div>
