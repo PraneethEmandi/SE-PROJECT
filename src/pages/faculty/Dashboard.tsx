@@ -34,6 +34,7 @@ const FacultyDashboard = () => {
         const token = localStorage.getItem("token");
         // const facultyId = localStorage.getItem("faculty_id"); // Store faculty ID in localStorage when logging in
         console.log("Token:", token);
+        // console.log(facultyId)
         // console.log("Faculty ID:", facultyId);
         if (!token) {
           console.error("Missing authentication details");
@@ -227,7 +228,7 @@ const FacultyDashboard = () => {
         {/* Welcome Section */}
         <section className="space-y-4">
           <h2 className="text-2xl font-bold tracking-tight">
-            Welcome back, Dr. Smith
+            Welcome ! 
           </h2>
           <p className="text-muted-foreground">
             Review and manage student requests from your personalized dashboard.
