@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# Welcome to SE COURSE project
 
 ## Project info
 
