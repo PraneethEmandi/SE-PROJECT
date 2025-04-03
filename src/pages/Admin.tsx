@@ -239,6 +239,8 @@ const AdminDashboard = () => {
   const [facultyPassword, setFacultyPassword] = useState("");
   const [facultyRole, setFacultyRole] = useState("");
   const [roles, setRoles] = useState([]);
+  const [clubName, setClubName] = useState("");
+  const isClubCoordinator = facultyRole === "1"; 
 
   // Fetch roles from the backend
   useEffect(() => {
@@ -298,6 +300,7 @@ const AdminDashboard = () => {
           email: facultyEmail,
           password: facultyPassword,
           role_id: facultyRole,
+          club_name: isClubCoordinator ? clubName : null, // Only send club name if the role is Club Coordinator
         }),
       });
 
@@ -437,6 +440,18 @@ const AdminDashboard = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                  {isClubCoordinator && (
+  <div className="grid gap-2">
+    <Label htmlFor="clubName">Club Name</Label>
+    <Input 
+      id="clubName"
+      value={clubName}
+      onChange={(e) => setClubName(e.target.value)}
+      className="bg-secondary"
+      placeholder="Enter club name"
+    />
+  </div>
+)}
                   <Button type="submit" className="w-full">
                     Add Faculty
                   </Button>
