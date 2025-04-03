@@ -35,6 +35,7 @@ const FacultyDashboard = () => {
         // const facultyId = localStorage.getItem("faculty_id"); // Store faculty ID in localStorage when logging in
         console.log("Token:", token);
         // console.log("Faculty ID:", facultyId);
+        // console.log(faculty)
         if (!token) {
           console.error("Missing authentication details");
           return;
