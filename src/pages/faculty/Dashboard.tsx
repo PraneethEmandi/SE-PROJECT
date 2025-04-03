@@ -453,7 +453,7 @@ const FacultyDashboard = () => {
                       src={getImageUrl(selectedRequest.id_card)}
                       alt="ID Card"
                       className="w-full max-w-xs rounded"
-                      onError={(e) => handleImageError(e)}
+                      //onError={(e) => handleImageError(e)}
                     />
                   </div>
                 </div>
