@@ -113,7 +113,7 @@ const Index = () => {
                         Submitted on {new Date(request.request_date).toLocaleDateString()}
                       </p>
                       <p className={`text-sm font-semibold ${
-                        request.status === "Approved" ? "text-green-500" :
+                        request.status === "approved" ? "text-green-500" : 
                         request.status === "Rejected" ? "text-red-500" :
                         "text-yellow-500"
                       }`}>
