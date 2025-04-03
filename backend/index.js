@@ -41,8 +41,8 @@ const upload = multer({
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "MKHarsha#8",
-  database: "mar28",
+  password: "peace",
+  database: "mar30",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -597,3 +597,74 @@ app.get("/api/approved-venues", async (req, res) => {
   }
 });
 
+
+app.post("/api/students", async (req, res) => {
+  const { name, email, password } = req.body;
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  const connection = await db.getConnection();
+
+  try {
+    // Insert the new student into the users table
+    const [result] = await connection.execute(
+      "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, 'Student')",
+      [name, email, password]
+    );
+
+    res.status(201).json({ message: "Student created successfully", studentId: result.insertId });
+  } catch (error) {
+    console.error("Error creating student:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    connection.release();
+  }
+});
+
+app.post("/api/faculty", async (req, res) => {
+  const { name, email, password, role_id, club_name } = req.body;
+  if (!name || !email || !password || !role_id) {
+    return res.status(400).json({ error: "Name, email, password, and role_id are required" });
+  }
+
+  const connection = await db.getConnection();
+
+  try {
+    // Insert faculty into users table
+    const [userResult] = await connection.execute(
+      "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, 'Faculty')",
+      [name, email, password]
+    );
+
+    const facultyId = userResult.insertId;
+
+    // Insert faculty role into faculty_roles table
+    await connection.execute(
+      "INSERT INTO faculty_roles (user_id, role_id, club_name) VALUES (?, ?, ?)",
+      [facultyId, role_id, club_name || null]
+    );
+
+    res.status(201).json({ message: "Faculty created successfully", facultyId });
+  } catch (error) {
+    console.error("Error creating faculty:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    connection.release();
+  }
+});
+
+// API to fetch all role names
+app.get("/api/roles", async (req, res) => {
+  const connection = await db.getConnection();
+
+  try {
+    const [results] = await connection.execute("SELECT id, role_name FROM roles");
+    res.status(200).json({ roles: results });
+  } catch (error) {
+    console.error("Error fetching roles:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    connection.release();
+  }
+});
