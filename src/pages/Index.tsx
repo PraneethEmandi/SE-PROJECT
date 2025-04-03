@@ -120,7 +120,7 @@ const Index = () => {
                         {request.status}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm">View Details</Button>
+                    {/* <Button variant="outline" size="sm">View Details</Button> */}
                   </div>
 
                   {/* Approvals Section */}
