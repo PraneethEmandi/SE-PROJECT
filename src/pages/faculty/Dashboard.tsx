@@ -214,13 +214,16 @@ const FacultyDashboard = () => {
   };
   const getImageUrl = (path) => {
     console.log(path);
-    return `../../backend${path}`; // Replace with actual base URL
+    console.log(window.location.href);
+    console.log(window.location.pathname);
+
+    return `../../backend/${path}`; // Replace with actual base URL
   };
 
-  const handleImageError = (event) => {
-    console.log("HI");
-    event.target.src = "/placeholder-image.jpg"; // Provide a fallback image
-  };
+  // const handleImageError = (event) => {
+  //   console.log("HI");
+  //   event.target.src = "/placeholder-image.jpg"; // Provide a fallback image
+  // };
   return (
     <DashboardLayout>
       <div className="space-y-8">
