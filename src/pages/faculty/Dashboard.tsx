@@ -119,7 +119,10 @@ const FacultyDashboard = () => {
     setSelectedRequest(request);
     setIsModalOpen(true);
 
-    const approvers = await fetchNextApprovers(request.permission, facultyHierarchy);
+    const approvers = await fetchNextApprovers(
+      request.permission,
+      facultyHierarchy
+    );
     console.log("Approvers: ", approvers);
     setNextApprovers(approvers);
     setSelectedApprover(""); // Reset selected approver
@@ -149,20 +152,27 @@ const FacultyDashboard = () => {
       const currentHierarchy = hierarchyData.hierarchy; // Extract hierarchy
       console.log("request ", request);
       // Send the appr  oval request
-      const response = await fetch("http://localhost:5000/api/approve-request", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
-        body: JSON.stringify({
-          request_id: request.request_id,
-          approver_id: hasNextApprovers ? selectedApprover : null, // Pass only if needed
-        }),
-      });
-  
+      const response = await fetch(
+        "http://localhost:5000/api/approve-request",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify({
+            request_id: request.request_id,
+            approver_id: hasNextApprovers ? selectedApprover : null, // Pass only if needed
+          }),
+        }
+      );
+
       if (response.ok) {
-        alert(hasNextApprovers ? "Request approved and forwarded!" : "Request fully approved!");
+        alert(
+          hasNextApprovers
+            ? "Request approved and forwarded!"
+            : "Request fully approved!"
+        );
         setRequests(requests.filter((r) => r.id !== request.request_id));
         window.location.reload();
       } else {
@@ -204,7 +214,7 @@ const FacultyDashboard = () => {
   };
   const getImageUrl = (path) => {
     console.log(path);
-    return `http://localhost:5000${path}`; // Replace with actual base URL
+    return `../../backend${path}`; // Replace with actual base URL
   };
 
   const handleImageError = (event) => {
@@ -296,58 +306,61 @@ const FacultyDashboard = () => {
                             ))}
                           </select>
                         )} */}
-                       
 
-{/** View Request Button */}
-<Button
-  size="sm"
-  variant="outline"
-  className="border-blue-500 text-blue-500 hover:bg-blue-50"
-  onClick={() => handleViewRequest(request)}
->
-  <HelpCircle className="mr-2 h-4 w-4" />
-  View Request
-</Button>
+                        {/** View Request Button */}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-blue-500 text-blue-500 "
+                          onClick={() => handleViewRequest(request)}
+                        >
+                          <HelpCircle className="mr-2 h-4 w-4" />
+                          View Request
+                        </Button>
 
-{/** Show Approve & Deny Buttons Only If a Request is Selected */}
-{selectedRequest?.request_id === request.request_id && (
-  <div className="flex gap-2">
-    {nextApprovers.length > 0 && (
-      <select
-        className="border p-2 rounded"
-        onChange={(e) => setSelectedApprover(e.target.value)}
-        value={selectedApprover || ""}
-      >
-        <option value="">Select Next Approver</option>
-        {nextApprovers.map((approver) => (
-          <option key={approver.id} value={approver.id}>
-            {approver.name} ({approver.role_name})
-          </option>
-        ))}
-      </select>
-    )}
+                        {/** Show Approve & Deny Buttons Only If a Request is Selected */}
+                        {selectedRequest?.request_id === request.request_id && (
+                          <div className="flex gap-2">
+                            {nextApprovers.length > 0 && (
+                              <select
+                                className="border p-2 rounded bg-black text-white"
+                                onChange={(e) =>
+                                  setSelectedApprover(e.target.value)
+                                }
+                                value={selectedApprover || ""}
+                              >
+                                <option value="">Select Next Approver</option>
+                                {nextApprovers.map((approver) => (
+                                  <option key={approver.id} value={approver.id}>
+                                    {approver.name} ({approver.role_name})
+                                  </option>
+                                ))}
+                              </select>
+                            )}
 
-    <Button
-      size="sm"
-      variant="outline"
-      className="border-emerald-500 text-emerald-500 hover:bg-emerald-50"
-      onClick={() => handleApprove(request)}
-    >
-      <CheckCircle2 className="mr-2 h-4 w-4" />
-      {hasNextApprovers ? "Approve & Forward" : "Approve"}
-    </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-emerald-500 text-emerald-500 "
+                              onClick={() => handleApprove(request)}
+                            >
+                              <CheckCircle2 className="mr-2 h-4 w-4" />
+                              {hasNextApprovers
+                                ? "Approve & Forward"
+                                : "Approve"}
+                            </Button>
 
-    <Button
-      size="sm"
-      variant="outline"
-      className="border-red-500 text-red-500 hover:bg-red-50"
-      onClick={() => denyRequest(request.request_id)}
-    >
-      <XCircle className="mr-2 h-4 w-4" />
-      Deny
-    </Button>
-  </div>
-)}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-red-500 text-red-500 "
+                              onClick={() => denyRequest(request.request_id)}
+                            >
+                              <XCircle className="mr-2 h-4 w-4" />
+                              Deny
+                            </Button>
+                          </div>
+                        )}
 
                         {/* <Button
                           size="sm"
@@ -430,7 +443,7 @@ const FacultyDashboard = () => {
               {selectedRequest.id_card && (
                 <div className="mt-4">
                   <strong className="text-gray-100">ID Card:</strong>
-                  <div className="mt-2 border border-gray-300 p-2">
+                  <div className="mt-2 border p-2">
                     <img
                       src={getImageUrl(selectedRequest.id_card)}
                       alt="ID Card"
